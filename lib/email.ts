@@ -1,53 +1,67 @@
 import { Resend } from "resend";
-import { EVENT } from "@/lib/config";
 
-type ConfirmationEmailArgs = {
+const resend = new Resend(process.env.RESEND_API_KEY!);
+
+type SendRegistrationEmailParams = {
   to: string;
-  fullName: string;
-  registrationCode: string;
-  adults: number;
-  extraShirts: number;
+  firstName: string;
+  lastName: string;
+  attendeeCount: number;
   donationAmount: number;
-  shirtAmount: number;
+  extraShirts: number;
   totalAmount: number;
-  qrDataUrl: string;
-  receiptUrl?: string | null;
+  registrationCode: string;
+  qrCodeDataUrl: string;
 };
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-export async function sendConfirmationEmail(args: ConfirmationEmailArgs) {
-  const from = process.env.FROM_EMAIL || "noreply@example.com";
-  const receiptBlock = args.receiptUrl
-    ? `<p style=\"margin:12px 0 0;\"><a href=\"${args.receiptUrl}\">View Stripe receipt</a></p>`
-    : "";
-
-  return resend.emails.send({
-    from,
-    to: args.to,
-    subject: `${EVENT.name} registration confirmed`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;color:#1f2937;line-height:1.5;">
-        <h1 style="color:#c2410c;">You're registered for ${EVENT.name}</h1>
-        <p>Hi ${args.fullName},</p>
-        <p>Thank you for registering. Your payment was received successfully.</p>
-        <div style="border:1px solid #fed7aa;border-radius:12px;padding:16px;background:#fff7ed;">
-          <p><strong>Registration code:</strong> ${args.registrationCode}</p>
-          <p><strong>Event date:</strong> ${EVENT.date}</p>
-          <p><strong>Location:</strong> ${EVENT.location}</p>
-          <p><strong>Adults registered:</strong> ${args.adults}</p>
-          <p><strong>Extra t-shirts:</strong> ${args.extraShirts}</p>
-          <p><strong>Donation:</strong> $${args.donationAmount}</p>
-          <p><strong>Extra shirt amount:</strong> $${args.shirtAmount}</p>
-          <p><strong>Total paid:</strong> $${args.totalAmount}</p>
-          ${receiptBlock}
-        </div>
-        <h2 style="margin-top:24px;">QR confirmation</h2>
-        <p>Please show this QR code at event check-in.</p>
-        <img src="${args.qrDataUrl}" alt="QR Code" style="width:220px;height:220px;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:white;" />
-        <p style="margin-top:24px;">We look forward to seeing you on ${EVENT.date}.</p>
-        <p>SGVP Gurukul USA</p>
+export async function sendRegistrationEmail({
+  to,
+  firstName,
+  lastName,
+  attendeeCount,
+  donationAmount,
+  extraShirts,
+  totalAmount,
+  registrationCode,
+  qrCodeDataUrl,
+}: SendRegistrationEmailParams) {
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #2C1810; line-height: 1.6;">
+      <div style="text-align:center; padding: 20px 0;">
+        <img src="${process.env.NEXT_PUBLIC_APP_URL}/head.png" alt="SGVP Gurukul USA" style="height: 100px;" />
+        <h2 style="margin: 10px 0 0;">Registration Confirmed</h2>
+        <p style="margin: 6px 0;">SGVP Gurukul USA Walk-A-Thon 2026</p>
       </div>
-    `,
+
+      <p>Dear ${firstName} ${lastName},</p>
+
+      <p>Thank you for registering for the SGVP Gurukul USA Walk-A-Thon supporting First Responders.</p>
+
+      <div style="background:#FFF3E8; padding:16px; border-radius:10px; border:1px solid #FFE0C4;">
+        <p><strong>Registration Code:</strong> ${registrationCode}</p>
+        <p><strong>Adults Registered:</strong> ${attendeeCount}</p>
+        <p><strong>Extra T-Shirts:</strong> ${extraShirts}</p>
+        <p><strong>Donation:</strong> $${(donationAmount / 100).toFixed(2)}</p>
+        <p><strong>Total Paid:</strong> $${(totalAmount / 100).toFixed(2)}</p>
+        <p><strong>Date:</strong> April 5, 2026</p>
+        <p><strong>Location:</strong> 2006 Fort Argyle Rd, Bloomingdale, GA 31302</p>
+      </div>
+
+      <div style="text-align:center; margin: 24px 0;">
+        <p><strong>Your QR Code</strong></p>
+        <img src="${qrCodeDataUrl}" alt="QR Code" style="width:220px; height:220px;" />
+      </div>
+
+      <p>Please keep this email for event check-in.</p>
+
+      <p>Thank you,<br />SGVP Gurukul USA</p>
+    </div>
+  `;
+
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to,
+    subject: "Your SGVP Walk-A-Thon Registration Confirmation",
+    html,
   });
 }

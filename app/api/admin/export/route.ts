@@ -1,19 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-export async function GET(request: Request) {
-  const token = new URL(request.url).searchParams.get("token");
-  if (!token || token !== process.env.ADMIN_EXPORT_TOKEN) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+export async function GET(req: NextRequest) {
+  const token = req.nextUrl.searchParams.get("token");
+
+  if (token !== process.env.ADMIN_EXPORT_TOKEN) {
+    return new NextResponse("Unauthorized", { status: 401 });
   }
 
   const { data, error } = await supabaseAdmin
     .from("registrations")
-    .select("registration_code,first_name,last_name,email,phone,adults,extra_shirts,donation_amount,shirt_amount,total_amount,payment_status,created_at")
+    .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
-    return NextResponse.json({ error: "Could not fetch registrations." }, { status: 500 });
+    return new NextResponse("Failed to fetch registrations", { status: 500 });
   }
 
   const headers = [
@@ -22,30 +23,34 @@ export async function GET(request: Request) {
     "last_name",
     "email",
     "phone",
-    "adults",
-    "extra_shirts",
-    "donation_amount",
-    "shirt_amount",
-    "total_amount",
+    "attendee_count",
+    "amount_total",
     "payment_status",
-    "created_at",
+    "created_at"
   ];
 
-  const rows = [headers.join(",")].concat(
-    (data || []).map((row) =>
-      headers
-        .map((key) => {
-          const value = String((row as Record<string, unknown>)[key] ?? "").replace(/"/g, '""');
-          return `"${value}"`;
-        })
-        .join(",")
-    )
+  const rows = (data || []).map((r) =>
+    [
+      r.registration_code,
+      r.first_name,
+      r.last_name,
+      r.email,
+      r.phone,
+      r.attendee_count,
+      (r.amount_total / 100).toFixed(2),
+      r.payment_status,
+      r.created_at
+    ]
+      .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
+      .join(",")
   );
 
-  return new NextResponse(rows.join("\n"), {
+  const csv = [headers.join(","), ...rows].join("\n");
+
+  return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv",
-      "Content-Disposition": 'attachment; filename="sgvp-registrations.csv"',
-    },
+      "Content-Disposition": 'attachment; filename="registrations.csv"'
+    }
   });
 }
