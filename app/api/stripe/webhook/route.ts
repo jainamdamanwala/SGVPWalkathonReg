@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
 
       if (email) {
         try {
-          await sendRegistrationEmail({
+          const emailResult = await sendRegistrationEmail({
             to: email,
             firstName,
             lastName,
@@ -117,7 +117,8 @@ export async function POST(req: NextRequest) {
             registrationCode,
             qrCodeDataUrl,
           });
-          console.log("Email sent successfully");
+
+          console.log("Email sent successfully:", emailResult);
         } catch (emailError) {
           console.error("Email sending failed:", emailError);
         }
