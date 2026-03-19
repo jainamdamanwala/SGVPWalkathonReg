@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
 function calculateAmount(attendeeCount: number) {
-  const pricePerPerson = 25; // change this to your real amount
+  const pricePerPerson = 20; // change this to your real amount
   return attendeeCount * pricePerPerson * 100; // cents
 }
 
