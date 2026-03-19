@@ -5,8 +5,10 @@ type SendRegistrationEmailParams = {
   firstName: string;
   lastName: string;
   attendeeCount: number;
-  donationAmount: number;
+  registrationTotal: number;
+  extraDonation: number;
   extraShirts: number;
+  shirtsTotal: number;
   totalAmount: number;
   registrationCode: string;
   qrCodeDataUrl: string;
@@ -27,8 +29,10 @@ export async function sendRegistrationEmail({
   firstName,
   lastName,
   attendeeCount,
-  donationAmount,
+  registrationTotal,
+  extraDonation,
   extraShirts,
+  shirtsTotal,
   totalAmount,
   registrationCode,
   qrCodeDataUrl,
@@ -43,9 +47,13 @@ export async function sendRegistrationEmail({
   const resend = getResendClient();
 
   const html = `
-    <div style="font-family: Arial, sans-serif; color: #2C1810; line-height: 1.6;">
+    <div style="font-family: Arial, sans-serif; color: #2C1810; line-height: 1.6; max-width: 680px; margin: 0 auto;">
       <div style="text-align:center; padding: 20px 0;">
-        ${appUrl ? `<img src="${appUrl}/head.png" alt="SGVP Gurukul USA" style="height: 100px;" />` : ""}
+        ${
+          appUrl
+            ? `<img src="${appUrl}/head.png" alt="SGVP Gurukul USA" style="height: 100px;" />`
+            : ""
+        }
         <h2 style="margin: 10px 0 0;">Registration Confirmed</h2>
         <p style="margin: 6px 0;">SGVP Gurukul USA Walk-A-Thon 2026</p>
       </div>
@@ -57,8 +65,10 @@ export async function sendRegistrationEmail({
       <div style="background:#FFF3E8; padding:16px; border-radius:10px; border:1px solid #FFE0C4;">
         <p><strong>Registration Code:</strong> ${registrationCode}</p>
         <p><strong>Adults Registered:</strong> ${attendeeCount}</p>
+        <p><strong>Base Registration:</strong> $${registrationTotal.toFixed(2)}</p>
+        <p><strong>Extra Donation:</strong> $${extraDonation.toFixed(2)}</p>
         <p><strong>Extra T-Shirts:</strong> ${extraShirts}</p>
-        <p><strong>Donation:</strong> $${Number(donationAmount).toFixed(2)}</p>
+        <p><strong>T-Shirt Amount:</strong> $${shirtsTotal.toFixed(2)}</p>
         <p><strong>Total Paid:</strong> $${(Number(totalAmount) / 100).toFixed(2)}</p>
         <p><strong>Date:</strong> April 5, 2026</p>
         <p><strong>Location:</strong> 2006 Fort Argyle Rd, Bloomingdale, GA 31302</p>

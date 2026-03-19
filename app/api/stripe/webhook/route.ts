@@ -51,7 +51,10 @@ export async function POST(req: NextRequest) {
     const phone = session.metadata?.phone || "";
     const attendeeCount = Number(session.metadata?.attendeeCount || 1);
     const extraShirts = Number(session.metadata?.extraShirts || 0);
-    const donationAmount = Number(session.metadata?.donationAmount || 0);
+    const extraDonation = Number(session.metadata?.extraDonation || 0);
+    const registrationTotal = Number(session.metadata?.registrationTotal || 0);
+    const shirtsTotal = Number(session.metadata?.shirtsTotal || 0);
+    const totalAmountDollars = Number(session.metadata?.totalAmountDollars || 0);
 
     try {
       const { data: existing, error: existingError } = await supabaseAdmin
@@ -111,9 +114,11 @@ export async function POST(req: NextRequest) {
             firstName,
             lastName,
             attendeeCount,
+            registrationTotal,
+            extraDonation,
             extraShirts,
-            donationAmount,
-            totalAmount: session.amount_total || 0,
+            shirtsTotal,
+            totalAmount: session.amount_total || Math.round(totalAmountDollars * 100),
             registrationCode,
             qrCodeDataUrl,
           });
