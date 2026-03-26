@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "SGVP Gurukul USA Walk-A-Thon Registration",
+              name: "SGVP Gurukul USA Unity-Walk Registration",
               description: `${attendeeCount} adult(s), ${extraShirts} extra shirt(s), $${extraDonation} extra donation`,
             },
             unit_amount: totalAmountCents,
