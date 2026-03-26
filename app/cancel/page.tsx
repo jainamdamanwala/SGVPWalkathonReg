@@ -67,7 +67,7 @@ export default function CancelPage() {
             marginTop: "14px",
           }}
         >
-          SGVP Gurukul USA · Shri Dharmajivan Mission Trust
+          SGVP Gurukul USA · Shree Dharmajivan Mission Trust
         </div>
         <h1
           style={{
